@@ -16,7 +16,7 @@ class AuthController extends Controller
         $services = \App\Models\Service::all();
         return view('register', compact('services'));
     }
-    public function showRegistration(Request $request)
+    public function storeRegistration(Request $request)
     {
         $rules = [
             'name' => 'required|string|max:255',
