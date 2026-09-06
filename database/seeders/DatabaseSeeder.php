@@ -56,7 +56,6 @@ class DatabaseSeeder extends Seeder
                 'available_days' => $l[9],
                 'available_time_start' => $l[10],
                 'available_time_end' => $l[11],
-                'bio' => "Experienced lawyer specializing in {$l[3]}.",
             ]);
         }
 

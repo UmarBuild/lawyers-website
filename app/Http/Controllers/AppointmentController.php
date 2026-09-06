@@ -101,4 +101,17 @@ $customer = Auth::user();
         return view('appointments.show', compact('appointment'));
 
     }
+    // mark notification as read
+    public function markNotificationRead($id)
+{
+    $notification = Notification::findOrFail($id);
+
+    if ($notification->user_id !== auth()->id()) {
+        abort(403);
+    }
+
+    $notification->update(['is_read' => true]);
+
+    return back();
+}
     }
