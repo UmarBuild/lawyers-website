@@ -88,5 +88,17 @@ $request->validate($rules);
      $lawyer->update($data);
      return redirect()->route('lawyer.dashboard')->with('success', 'Profile updated successfully.');
 }
-        
+       public function appointments(Request $request){
+    $lawyer = auth()->user();
+
+    $query = $lawyer->lawyerAppointments()->orderByDesc('created_at');
+
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    $appointments = $query->paginate(10);
+
+    return view('lawyer.appointments', compact('appointments'));
+} 
 }

@@ -34,7 +34,6 @@
         </div>
     </div>
 
-    {{-- Notifications --}}
     @if($unreadNotifications->count() > 0)
     <div class="bg-white border border-gray-100 rounded-lg mb-8">
         <div class="px-6 py-4 border-b border-gray-100 font-semibold text-gray-800">Notifications</div>
@@ -46,14 +45,17 @@
     </div>
     @endif
 
-    {{-- Appointments --}}
     <div class="bg-white border border-gray-100 rounded-lg">
-        <div class="px-6 py-4 border-b border-gray-100 font-semibold text-gray-800">Appointments</div>
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+            <span class="font-semibold text-gray-800">Recent Appointments</span>
+            <a href="{{ route('lawyer.appointments') }}" class="text-sm text-primary-500 hover:underline">Manage All</a>
+        </div>
 
         @if($appointments->count() > 0)
         <div class="divide-y divide-gray-100">
             @foreach($appointments as $appointment)
-            <a href="{{ route('appointments.show', $appointment->id) }}" class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 px-6 py-4 hover:bg-gray-50 transition">
+            <a href="{{ route('appointments.show', $appointment->id) }}"
+               class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 px-6 py-4 hover:bg-gray-50 transition">
                 <div>
                     <p class="font-medium text-gray-800">{{ $appointment->customer->name }}</p>
                     <p class="text-sm text-gray-500">{{ $appointment->formattedDateTime() }}</p>
@@ -66,7 +68,6 @@
             </a>
             @endforeach
         </div>
-        <div class="px-6 py-4">{{ $appointments->links() }}</div>
         @else
         <p class="px-6 py-10 text-center text-gray-400">No appointments yet.</p>
         @endif

@@ -41,7 +41,7 @@ Route::middleware(['auth', 'lawyer'])->group(function () {
 
     Route::put('/lawyer/update-profile', [LawyerController::class, 'updateProfile'])->name('lawyer.update-profile');
 
-    Route::get('/lawyer/appointments', [LawyerController::class, 'dashboard'])->name('lawyer.appointments');
+    Route::get('/lawyer/appointments', [LawyerController::class, 'appointments'])->name('lawyer.appointments');
 
     Route::post('/appointments/{id}/update-status', [AppointmentController::class, 'updateStatus'])->name('appointments.update-status');
 

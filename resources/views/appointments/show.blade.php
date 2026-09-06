@@ -30,7 +30,6 @@
                 @endif
             </div>
 
-            <!-- If lawyer is viewing, show approve/reject buttons -->
             @if(auth()->user()->isLawyer() && $appointment->isPending())
             <div class="flex gap-2 mt-6">
                 <form action="{{ route('appointments.update-status', $appointment->id) }}" method="POST">
