@@ -46,7 +46,7 @@ return view('lawyers.index',compact('lawyers','cities','specializations'));
         public function dashboard(){
 $lawyer = auth()->user();
 
-        $appointments = $lawyer->lawyerAppointments()->orderByDesc('created_at')->paginate(10);
+        $appointments = $lawyer->lawyerAppointments()->orderByDesc('created_at')->take(5)->get();
 
         $totalAppointments  = $lawyer->lawyerAppointments()->count();
         $pendingAppointments = $lawyer->lawyerAppointments()->where('status', 'pending')->count();
