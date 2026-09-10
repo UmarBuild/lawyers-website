@@ -81,7 +81,7 @@ $rules = [
             'available_time_end'    => 'nullable|date_format:H:i',
 ];
 $request->validate($rules);
-     $data = $request->except(['email', 'password', 'role', 'is_approved', 'bar_council_number']);
+     $data = $request->except(['email', 'password', 'role', 'is_approved', 'bar_council_number','rating']);
      if($request->has('available_days')){
         $data['available_days'] = json_encode($request->available_days);
      }

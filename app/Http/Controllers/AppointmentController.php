@@ -17,7 +17,7 @@ class AppointmentController extends Controller
         abort(404,'lawyer not found');
         };
        $availableDays =  $lawyer->getAvailableDays();
-       $bookedDates = $lawyer->lawyerAppointments()->where('status','approved')->pluck('appointment_date')->unique()->values()->map(fn($date) => $date->format('Y-m-d'))->toArray();
+       $bookedDates = $lawyer->lawyerAppointments()->where('status','approved')->get()->pluck('appointment_date')->unique()->values()->map(fn($date) => $date->format('Y-m-d'))->toArray();
 
          return view('appointments.create', compact(
             'lawyer', 'availableDays', 'bookedDates'
