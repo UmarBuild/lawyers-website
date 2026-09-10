@@ -1,47 +1,56 @@
-<laravel-boost-guidelines>
-# Laravel Application
+# Project Guidelines — LawyerConnect
 
-This repository contains a Laravel application. Complete the following setup before working on the user's request.
+This is a Laravel 13 + Tailwind CSS v4 + Blade application for an Online Lawyers
+Application Website. The repository contains a complete customer/lawyer/admin
+system with appointment booking, ratings, and notifications.
 
-## Prerequisites
+## Development Setup
 
-Verify that PHP and Composer are available:
-
-```sh
-php -v
-composer -V
+```bash
+composer install
+npm install && npm run build
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+php artisan serve
 ```
 
-If either command is unavailable, detect the user's operating system and install the prerequisites with the appropriate command:
+## Architecture Notes
 
-macOS:
+- **Auth**: Custom `AuthController` (no Laravel Breeze/Jetstream). Roles are
+  stored on the `users.role` column (`customer`, `lawyer`, `admin`).
+- **Middleware**: `lawyer` and `admin` aliases registered in `bootstrap/app.php`.
+  Lawyers must also have `is_approved = true` to log in.
+- **Database**: SQLite by default. Switch to MySQL via `.env` for production.
+- **CSS**: Tailwind v4 with custom theme tokens (primary blue + accent gold)
+  defined in `resources/css/app.css` under `@theme`.
+- **JS**: No framework — vanilla JS in `public/js/app.js` (built from
+  `resources/js/app.js`).
 
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/mac/8.5)"
+## Code Conventions
+
+- All comments must be in **English**.
+- Controller method names use camelCase (`storeRegistration`, `editProfile`).
+- Route names use dot notation (`admin.lawyers.approve`).
+- Models expose small helper methods (`isLawyer()`, `isApproved()`,
+  `formattedDateTime()`) instead of inline conditionals in views.
+- Validation rules live in the controller action that handles the request.
+
+## Default Seed Accounts
+
+| Role     | Email             | Password     |
+|----------|-------------------|--------------|
+| Admin    | admin@lawyers.com | admin123     |
+| Lawyer   | ahmed@lawyer.com  | lawyer123    |
+| Customer | ali@gmail.com     | customer123  |
+
+## Common Commands
+
+```bash
+php artisan migrate --seed         # Reset DB and reseed
+php artisan serve                  # Dev server on :8000
+npm run dev                        # Watch CSS during development
+npm run build                      # Compile CSS for production
+php artisan route:list             # Inspect registered routes
+php artisan tinker                 # REPL for DB inspection
 ```
-
-Windows PowerShell:
-
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://php.new/install/windows/8.5'))
-```
-
-Linux:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
-```
-
-After installation, ask the user to restart their terminal. If the agent needs the restarted shell to continue, ask the user to reopen their terminal and rerun their original prompt.
-
-## Agent Setup
-
-Install Laravel Boost from the application root before making application changes:
-
-```sh
-composer require laravel/boost --dev
-php artisan boost:install
-```
-
-Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
-</laravel-boost-guidelines>

@@ -39,12 +39,15 @@ class Notification extends Model
     public function iconClass(): string
     {
         return match($this->type) {
-            'appointment_booked'     => 'bi-calendar-plus',   
-            'appointment_approved'   => 'bi-check-circle',   
-            'appointment_rejected'   => 'bi-x-circle',  
-            'lawyer_approved'        => 'bi-shield-check', 
-            'new_message'            => 'bi-envelope',  
-            default                  => 'bi-bell',  
+            'appointment_booked'     => 'bi-calendar-plus',
+            'appointment_approved'   => 'bi-check-circle',
+            'appointment_rejected'   => 'bi-x-circle',
+            'appointment_cancelled'  => 'bi-calendar-x',
+            'appointment_completed'  => 'bi-calendar-check',
+            'lawyer_approved'        => 'bi-shield-check',
+            'new_lawyer_registration'=> 'bi-person-plus',
+            'new_message'            => 'bi-envelope',
+            default                  => 'bi-bell',
         };
     }
     public function timeAgo(): string

@@ -7,9 +7,15 @@
 <div class="max-w-6xl mx-auto px-4 py-10">
 
     {{-- Welcome Header --}}
-    <div class="bg-primary-500 text-white rounded-lg p-8 mb-8">
-        <h1 class="text-2xl md:text-3xl font-bold mb-1">Welcome back, {{ $user->name }} 👋</h1>
-        <p class="text-primary-100">Here's a quick look at your recent activity.</p>
+    <div class="bg-primary-500 text-white rounded-lg p-8 mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-bold mb-1">Welcome back, {{ $user->name }} 👋</h1>
+            <p class="text-primary-100">Here's a quick look at your recent activity.</p>
+        </div>
+        <a href="{{ route('customer.profile.edit') }}"
+           class="self-start md:self-auto bg-white text-primary-700 px-5 py-2 rounded-lg font-semibold hover:bg-primary-50 transition">
+            Edit Profile
+        </a>
     </div>
 
     {{-- Quick Actions --}}

@@ -6,12 +6,12 @@
 
 <section class="bg-primary-500 text-white py-20">
     <div class="max-w-7xl mx-auto px-4 text-center">
-        <h1 class="text-5xl font-bold mb-4">Find The Best Lawyers</h1>
-        <p class="text-xl mb-8 text-primary-100">Search lawyers by specialization and city. Book appointments online.</p>
+        <h1 class="text-5xl font-bold mb-4">{{ $heroTitle }}</h1>
+        <p class="text-xl mb-8 text-primary-100">{{ $heroSubtitle }}</p>
 
         <form action="{{ route('lawyers.index') }}" method="GET" class="max-w-2xl mx-auto flex gap-2">
             <input type="text" name="search" placeholder="Search by name..."
-                   class="flex-1 px-4 py-3 rounded-lg border-white bg text-white focus:outline-1 focus:outline-white">
+                   class="flex-1 px-4 py-3 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/40 focus:outline-none focus:ring-2 focus:ring-white">
 
             <select name="specialization" class="px-4 py-3 rounded-lg bg-white text-black focus:outline-none">
                 <option value="">All Specializations</option>
@@ -39,8 +39,8 @@
             <div class="text-gray-600 mt-2">Practice Areas</div>
         </div>
         <div class="p-6">
-            <div class="text-4xl font-bold text-primary-500">24/7</div>
-            <div class="text-gray-600 mt-2">Online Booking</div>
+            <div class="text-4xl font-bold text-primary-500">{{ $statOnlineValue }}</div>
+            <div class="text-gray-600 mt-2">{{ $statOnlineLabel }}</div>
         </div>
 
     </div>

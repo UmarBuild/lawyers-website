@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('role')->default('customer')->after('address');
             $table->string('specialization')->nullable()->after('role');
             $table->string('qualification')->nullable()->after('specialization');
-            $table->string('experience_years')->nullable()->after('qualification');
+            $table->integer('experience_years')->nullable()->after('qualification');
             $table->string('consultation_fee')->nullable()->after('experience_years');
             $table->string('bar_council_number')->nullable()->after('consultation_fee');
             $table->decimal('rating', 2, 1)->default(0.0)->after('bar_council_number');

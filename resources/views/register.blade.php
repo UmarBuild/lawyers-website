@@ -37,21 +37,18 @@
                     </div>
                 </div>
 
-                <!-- Name -->
                 <div class="mb-4">
                     <label class="block text-gray-700 font-medium mb-1">Full Name</label>
                     <input type="text" name="name" value="{{ old('name') }}"
                            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-primary-500" required>
                 </div>
 
-                <!-- Email -->
                 <div class="mb-4">
                     <label class="block text-gray-700 font-medium mb-1">Email</label>
                     <input type="email" name="email" value="{{ old('email') }}"
                            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-primary-500" required>
                 </div>
 
-                <!-- Password -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="block text-gray-700 font-medium mb-1">Password</label>
@@ -64,16 +61,6 @@
                                class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-primary-500" required>
                     </div>
                 </div>
-
-                <!-- ============================================= -->
-                <!-- LAWYER FIELDS — Conditionally dikhao           -->
-                <!-- ============================================= -->
-                <!-- Ye fields sirf tab dikhenge jab user           -->
-                <!-- "Lawyer" radio select kare.                     -->
-                <!-- JavaScript se show/hide karenge.               -->
-                <!-- By default hidden hai (id="lawyer-fields"      -->
-                <!--   pe class="hidden")                            -->
-                <!-- ============================================= -->
 
                 <div id="lawyer-fields" class="hidden border-t pt-4 mt-4 space-y-4">
 
@@ -156,7 +143,6 @@
 
 @push('scripts')
 <script>
-
 document.querySelectorAll('.role-radio').forEach(function(radio) {
     radio.addEventListener('change', function() {
         var lawyerFields = document.getElementById('lawyer-fields');

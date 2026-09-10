@@ -103,7 +103,7 @@
 
                 <div>
                     <h3 class="text-white font-bold text-lg mb-3">LawyerConnect</h3>
-                    <p class="text-sm">Find the best lawyers in your city. Book appointments online easily and quickly.</p>
+                    <p class="text-sm">{{ $footerAbout }}</p>
                 </div>
 
                 <div>
@@ -111,15 +111,22 @@
                     <ul class="space-y-2 text-sm">
                         <li><a href="{{ route('home') }}" class="hover:text-white transition">Home</a></li>
                         <li><a href="{{ route('lawyers.index') }}" class="hover:text-white transition">Find Lawyers</a></li>
+                        <li><a href="{{ route('about') }}" class="hover:text-white transition">About Us</a></li>
                         <li><a href="{{ route('contact') }}" class="hover:text-white transition">Contact Us</a></li>
                     </ul>
                 </div>
 
                 <div>
-                    <h3 class="text-white font-bold text-lg mb-3">Contact Info</h3>
-                    <p class="text-sm">info@lawyerconnect.com</p>
-                    <p class="text-sm">+92 300 1234567</p>
-                    <p class="text-sm">Karachi, Pakistan</p>
+                    <h3 class="text-white font-bold text-lg mb-3">Legal</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="{{ route('privacy') }}" class="hover:text-white transition">Privacy Policy</a></li>
+                        <li><a href="{{ route('terms') }}" class="hover:text-white transition">Terms &amp; Conditions</a></li>
+                        <li><a href="{{ route('contact') }}" class="hover:text-white transition">Report an Issue</a></li>
+                    </ul>
+                    <h3 class="text-white font-bold text-lg mb-3 mt-6">Contact Info</h3>
+                    <p class="text-sm">{{ $footerEmail }}</p>
+                    <p class="text-sm">{{ $footerPhone }}</p>
+                    <p class="text-sm">{{ $footerAddress }}</p>
                 </div>
 
             </div>

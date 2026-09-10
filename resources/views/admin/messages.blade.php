@@ -18,6 +18,7 @@
         <a href="{{ route('admin.appointments') }}" class="px-4 py-2 rounded-lg bg-white border border-gray-200 text-sm font-medium hover:bg-gray-50">Appointments</a>
         <a href="{{ route('admin.services') }}" class="px-4 py-2 rounded-lg bg-white border border-gray-200 text-sm font-medium hover:bg-gray-50">Services</a>
         <a href="{{ route('admin.messages') }}" class="px-4 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium">Messages</a>
+        <a href="{{ route('admin.content') }}" class="px-4 py-2 rounded-lg bg-white border border-gray-200 text-sm font-medium hover:bg-gray-50">Content</a>
     </div>
 
     <div class="space-y-4">
