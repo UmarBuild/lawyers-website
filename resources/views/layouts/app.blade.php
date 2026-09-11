@@ -40,6 +40,19 @@
 
                 <a href="{{ route('contact') }}" class="px-3 py-2 rounded hover:bg-primary-600 transition">Contact</a>
 
+                @auth
+                    {{-- Role-based Dashboard link visible in the top nav bar --}}
+                    @if(auth()->user()->isCustomer())
+                        <a href="{{ route('customer.dashboard') }}" class="px-3 py-2 rounded hover:bg-primary-600 transition">My Dashboard</a>
+                        <a href="{{ route('my-appointments') }}" class="px-3 py-2 rounded hover:bg-primary-600 transition">My Appointments</a>
+                    @elseif(auth()->user()->isLawyer())
+                        <a href="{{ route('lawyer.dashboard') }}" class="px-3 py-2 rounded hover:bg-primary-600 transition">My Dashboard</a>
+                        <a href="{{ route('lawyer.appointments') }}" class="px-3 py-2 rounded hover:bg-primary-600 transition">My Appointments</a>
+                    @elseif(auth()->user()->isAdmin())
+                        <a href="{{ route('admin.dashboard') }}" class="px-3 py-2 rounded hover:bg-primary-600 transition">Admin Panel</a>
+                    @endif
+                @endauth
+
                 @guest
                 <a href="{{ route('login') }}" class="px-3 py-2 rounded hover:bg-primary-600 transition">Login</a>
                 <a href="{{ route('register') }}" class="ml-2 px-4 py-2 bg-accent text-primary-900 font-semibold rounded hover:bg-yellow-400 transition">Register</a>
@@ -60,13 +73,19 @@
 
                         @if(auth()->user()->isLawyer())
                         <a href="{{ route('lawyer.dashboard') }}" class="block px-4 py-2 hover:bg-gray-100">My Dashboard</a>
+                        <a href="{{ route('lawyer.edit-profile') }}" class="block px-4 py-2 hover:bg-gray-100">Edit Profile</a>
+                        <a href="{{ route('lawyer.appointments') }}" class="block px-4 py-2 hover:bg-gray-100">My Appointments</a>
                         @endif
 
                         @if(auth()->user()->isAdmin())
                         <a href="{{ route('admin.dashboard') }}" class="block px-4 py-2 hover:bg-gray-100">Admin Panel</a>
+                        <a href="{{ route('admin.content') }}" class="block px-4 py-2 hover:bg-gray-100">Manage Content</a>
                         @endif
 
                         @if(auth()->user()->isCustomer())
+                        <a href="{{ route('customer.dashboard') }}" class="block px-4 py-2 hover:bg-gray-100">My Dashboard</a>
+                        <a href="{{ route('customer.profile.edit') }}" class="block px-4 py-2 hover:bg-gray-100">Edit Profile</a>
+                        <a href="{{ route('customer.password.edit') }}" class="block px-4 py-2 hover:bg-gray-100">Change Password</a>
                         <a href="{{ route('my-appointments') }}" class="block px-4 py-2 hover:bg-gray-100">My Appointments</a>
                         @endif
 

@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -128,7 +127,7 @@ class AuthController extends Controller
 
     public function showForgotPassword()
     {
-        return view('auth.forgot-password');
+        return view('forgot-password');
     }
 
     public function sendResetLink(Request $request)
@@ -137,18 +136,74 @@ class AuthController extends Controller
             'email' => 'required|email',
         ]);
 
-        $status = Password::sendResetLink(
-            $request->only('email')
+        // First, verify that the email actually exists in our users table.
+        // This prevents us from sending a "reset link sent" message for emails
+        // that don't belong to anyone (better UX + slight security hint).
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return redirect()->back()
+                ->withErrors(['email' => 'We could not find an account with that email address.'])
+                ->withInput();
+        }
+
+        // Generate the reset token manually so we can BOTH mail it (if a real
+        // mailer is configured) AND show it on screen for local testing.
+        // This is helpful because the default Laravel .env ships with
+        // MAIL_MAILER=log, which means no real email is sent — the link would
+        // only appear inside storage/logs/laravel.log and be hard to find.
+        $token = Str::random(60);
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $request->email],
+            [
+                'email'      => $request->email,
+                'token'      => $token,
+                'created_at' => now(),
+            ]
         );
 
-        return $status === Password::RESET_LINK_SENT
-            ? redirect()->route('login')->with('success', __($status))
-            : redirect()->back()->withErrors(['email' => __($status)]);
+        $resetUrl = url('/reset-password/' . $token . '?email=' . urlencode($request->email));
+
+        // Detect whether a real mailer is configured. If MAIL_MAILER is "log"
+        // (the default), the email is only written to storage/logs/laravel.log
+        // and no real message is delivered — so we also surface the link on
+        // the login page for local testing convenience.
+        $mailer = config('mail.default');
+        $isLogMailer = in_array($mailer, ['log', 'null', 'array']);
+
+        if (!$isLogMailer) {
+            // Try to actually send the email through the configured mailer.
+            try {
+                Mail::raw(
+                    "Hello,\n\nYou requested a password reset for your LawyerConnect account.\n\n"
+                    . "Click the link below to reset your password:\n"
+                    . $resetUrl . "\n\n"
+                    . "If you did not request this reset, you can safely ignore this email.\n\n"
+                    . "Regards,\nLawyerConnect Team",
+                    function ($message) use ($request) {
+                        $message->to($request->email)
+                                ->subject('LawyerConnect — Password Reset Link');
+                    }
+                );
+
+                return redirect()->route('login')
+                    ->with('success', 'We have emailed you a password reset link. Please check your inbox.');
+            } catch (\Throwable $e) {
+                // Mailer misconfigured — fall through to the local-testing path.
+            }
+        }
+
+        // Either the mailer is "log" (no real delivery) or sending failed.
+        // Show the reset link on screen so the user can still complete the flow.
+        return redirect()->route('login')
+            ->with('success', 'Password reset link generated. Email could not be sent (mail not configured) — click the link below to reset your password.')
+            ->with('reset_link', $resetUrl);
     }
 
     public function showResetPassword(Request $request, $token = null)
     {
-        return view('auth.reset-password', [
+        return view('reset-password', [
             'token' => $token,
             'email' => $request->email,
         ]);
@@ -162,19 +217,44 @@ class AuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function (User $user, string $password) {
-                $user->forceFill([
-                    'password'       => Hash::make($password),
-                    'remember_token' => Str::random(60),
-                ])->save();
-            }
-        );
+        // Validate the token against the password_reset_tokens table.
+        // We use our own token validation here (instead of Password::reset)
+        // because we generated the token ourselves in sendResetLink().
+        $record = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->where('token', $request->token)
+            ->first();
 
-        return $status === Password::PASSWORD_RESET
-            ? redirect()->route('login')->with('success', __($status))
-            : redirect()->back()->withErrors(['email' => __($status)]);
+        if (!$record) {
+            return redirect()->back()
+                ->withErrors(['email' => 'This password reset link is invalid or has expired.'])
+                ->withInput();
+        }
+
+        // Tokens expire after 60 minutes for security.
+        if (now()->diffInMinutes($record->created_at) > 60) {
+            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+            return redirect()->route('password.request')
+                ->withErrors(['email' => 'This password reset link has expired. Please request a new one.']);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return redirect()->back()
+                ->withErrors(['email' => 'No account found with that email address.'])
+                ->withInput();
+        }
+
+        $user->forceFill([
+            'password'       => Hash::make($request->password),
+            'remember_token' => Str::random(60),
+        ])->save();
+
+        // Invalidate the token so it can't be reused.
+        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+        return redirect()->route('login')
+            ->with('success', 'Your password has been reset successfully! You can now log in with your new password.');
     }
 
     public function getDashboardRoute()

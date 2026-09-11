@@ -19,6 +19,21 @@
             </div>
             @endif
 
+            @if(session('success'))
+            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4 text-sm">
+                {{ session('success') }}
+            </div>
+            @endif
+
+            {{-- If email sending failed, surface the reset link here for local testing --}}
+            @if(session('reset_link'))
+            <div class="bg-yellow-50 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-lg mb-4 text-sm break-all">
+                <p class="font-semibold mb-1">Password Reset Link (local testing mode):</p>
+                <p class="mb-2">Email could not be sent because mail is not configured. Click the link below to reset your password:</p>
+                <a href="{{ session('reset_link') }}" class="text-primary-600 underline break-all">{{ session('reset_link') }}</a>
+            </div>
+            @endif
+
             <form action="{{ route('login.authenticate') }}" method="POST">
                 @csrf
 
