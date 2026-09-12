@@ -13,17 +13,19 @@ body {
 
     --font-poppins: 'Poppins', ui-sans-serif, system-ui, sans-serif;
 
-    --color-primary-50: #eef4fb;
-    --color-primary-100: #d9e6f5;
-    --color-primary-200: #b3cceb;
-    --color-primary-300: #8db3e0;
-    --color-primary-400: #5c8ecf;
-    --color-primary-500: #2f5f9e;
-    --color-primary-600: #254c80;
-    --color-primary-700: #1c3961;
-    --color-primary-800: #142842;
-    --color-primary-900: #0d1a2b;
-    --color-accent: #d4af37;
+    --color-primary-50: #f4f6fa;
+    --color-primary-100: #e2e8f0;
+    --color-primary-200: #cbd5e1;
+    --color-primary-300: #94a3b8;
+    --color-primary-400: #3b5a80;
+    --color-primary-500: #1a365d;
+    --color-primary-600: #142c4c;
+    --color-primary-700: #0f223d;
+    --color-primary-800: #0a172a;
+    --color-primary-900: #070f1e;
+    --color-primary-950: #040913;
+    --color-accent: #c5a059;
+    --color-accent-hover: #b38e46;
 }
 html {
     scroll-behavior: smooth;

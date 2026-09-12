@@ -7,6 +7,7 @@ use App\Models\Appointment;
 use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AppointmentController extends Controller
 {
@@ -43,44 +44,72 @@ class AppointmentController extends Controller
             'message'          => 'nullable|string|max:1000',
         ]);
 
-        $exists = Appointment::where('lawyer_id', $request->lawyer_id)
+        $customer = Auth::user();
+        $cleanTime = date('H:i', strtotime($request->appointment_time));
+
+        // 1. Check if the lawyer already has an ACTIVE (pending or approved) appointment in this slot
+        $lawyerSlotOccupied = Appointment::where('lawyer_id', $request->lawyer_id)
             ->where('appointment_date', $request->appointment_date)
-            ->where('appointment_time', $request->appointment_time)
+            ->where(function($query) use ($cleanTime) {
+                $query->where('appointment_time', $cleanTime)
+                      ->orWhere('appointment_time', $cleanTime . ':00');
+            })
+            ->whereIn('status', ['pending', 'approved'])
             ->exists();
 
-        if ($exists) {
+        if ($lawyerSlotOccupied) {
             return redirect()->back()
-                ->with('error', 'You already have an appointment at this date and time.')
+                ->with('error', 'This appointment slot is already booked for this advocate. Please select another date or time.')
                 ->withInput();
         }
 
-        $customer = Auth::user();
+        // 2. Check if the customer themselves already booked an active appointment at this date & time
+        $customerHasConflict = Appointment::where('customer_id', $customer->id)
+            ->where('appointment_date', $request->appointment_date)
+            ->where(function($query) use ($cleanTime) {
+                $query->where('appointment_time', $cleanTime)
+                      ->orWhere('appointment_time', $cleanTime . ':00');
+            })
+            ->whereIn('status', ['pending', 'approved'])
+            ->exists();
 
-        $appointment = Appointment::create([
-            'lawyer_id'        => $request->lawyer_id,
-            'customer_id'      => $customer->id,
-            'appointment_date' => $request->appointment_date,
-            'appointment_time' => $request->appointment_time,
-            'message'          => $request->message,
-            'status'           => 'pending',
-        ]);
+        if ($customerHasConflict) {
+            return redirect()->back()
+                ->with('error', 'You already have an active appointment booked at this date and time.')
+                ->withInput();
+        }
 
-        Notification::create([
-            'user_id' => $request->lawyer_id,
-            'type'    => 'appointment_booked',
-            'message' => "New appointment request from {$customer->name} on {$request->appointment_date}.",
-            'link'    => '/lawyer/appointments',
-            'is_read' => false,
-        ]);
+        // 3. Atomically create appointment and notifications in a transaction
+        DB::transaction(function() use ($request, $customer, $cleanTime) {
+            $appointment = Appointment::create([
+                'lawyer_id'        => $request->lawyer_id,
+                'customer_id'      => $customer->id,
+                'appointment_date' => $request->appointment_date,
+                'appointment_time' => $cleanTime,
+                'message'          => $request->message,
+                'status'           => 'pending',
+            ]);
 
-        $lawyer = User::find($request->lawyer_id);
-        Notification::create([
-            'user_id' => $customer->id,
-            'type'    => 'appointment_booked',
-            'message' => "Your appointment request with {$lawyer->name} has been sent. Waiting for approval.",
-            'link'    => '/my-appointments',
-            'is_read' => false,
-        ]);
+            $lawyer = User::find($request->lawyer_id);
+
+            // Notify lawyer
+            Notification::create([
+                'user_id' => $request->lawyer_id,
+                'type'    => 'appointment_booked',
+                'message' => "New appointment request from {$customer->name} on {$request->appointment_date} at " . date('h:i A', strtotime($cleanTime)) . ".",
+                'link'    => '/lawyer/appointments',
+                'is_read' => false,
+            ]);
+
+            // Notify customer
+            Notification::create([
+                'user_id' => $customer->id,
+                'type'    => 'appointment_booked',
+                'message' => "Your appointment request with {$lawyer->name} for {$request->appointment_date} has been sent. Waiting for approval.",
+                'link'    => '/my-appointments',
+                'is_read' => false,
+            ]);
+        });
 
         return redirect()->route('my-appointments')
             ->with('success', 'Appointment booked successfully! Waiting for lawyer approval.');
@@ -195,6 +224,18 @@ class AppointmentController extends Controller
 
     public function markNotificationRead($id)
     {
+        if ($id === 'all') {
+            Notification::where('user_id', auth()->id())
+                ->where('is_read', false)
+                ->update(['is_read' => true]);
+
+            if (request()->wantsJson() || request()->ajax()) {
+                return response()->json(['success' => true]);
+            }
+
+            return back();
+        }
+
         $notification = Notification::findOrFail($id);
 
         if ($notification->user_id !== auth()->id()) {
@@ -202,6 +243,10 @@ class AppointmentController extends Controller
         }
 
         $notification->update(['is_read' => true]);
+
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json(['success' => true]);
+        }
 
         return back();
     }
