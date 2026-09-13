@@ -161,14 +161,14 @@
 </section>
 
 @if($featuredLawyers->count() > 0)
-<section class="py-16">
+<section class="py-10 sm:py-16">
     <div class="max-w-7xl mx-auto px-4">
-        <div class="text-center mb-10">
+        <div class="text-center mb-8 sm:mb-10">
             <span class="text-accent font-semibold text-xs uppercase tracking-wider">Top Rated Advocates</span>
-            <h2 class="text-3xl font-bold text-gray-900 mt-1">Featured Legal Experts</h2>
+            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">Featured Legal Experts</h2>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
 
             @foreach($featuredLawyers as $lawyer)
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-xl transition duration-300 flex flex-col justify-between">
@@ -214,13 +214,13 @@
 </section>
 @endif
 
-<section class="py-16 bg-slate-100/70 border-t border-gray-200/60">
+<section class="py-10 sm:py-16 bg-slate-100/70 border-t border-gray-200/60">
     <div class="max-w-7xl mx-auto px-4">
-        <div class="text-center mb-10">
+        <div class="text-center mb-8 sm:mb-10">
             <span class="text-accent font-semibold text-xs uppercase tracking-wider">Practice Areas</span>
-            <h2 class="text-3xl font-bold text-gray-900 mt-1">Browse by Legal Specialization</h2>
+            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">Browse by Legal Specialization</h2>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
 
             @foreach($services as $service)
             <a href="{{ route('lawyers.index') }}?specialization={{ urlencode($service->name) }}"

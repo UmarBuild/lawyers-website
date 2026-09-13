@@ -59,6 +59,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/notifications/{id}/read', [AppointmentController::class, 'markNotificationRead'])
          ->name('notifications.read');
 
+    // Notification "delete" (single or all)
+    Route::delete('/notifications/{id}/delete', [AppointmentController::class, 'deleteNotification'])
+         ->name('notifications.delete');
+
+    // All notifications page
+    Route::get('/notifications', [AppointmentController::class, 'showNotifications'])
+         ->name('notifications.index');
+
     // Customer dashboard + profile
     Route::get('/customer/dashboard', [HomeController::class, 'customerDashboard'])->name('customer.dashboard');
     Route::get('/customer/profile/edit', [HomeController::class, 'editCustomerProfile'])->name('customer.profile.edit');
@@ -73,6 +81,10 @@ Route::middleware(['auth', 'lawyer'])->group(function () {
     Route::get('/lawyer/edit-profile', [LawyerController::class, 'editProfile'])->name('lawyer.edit-profile');
     Route::put('/lawyer/update-profile', [LawyerController::class, 'updateProfile'])->name('lawyer.update-profile');
     Route::get('/lawyer/appointments', [LawyerController::class, 'appointments'])->name('lawyer.appointments');
+
+    // Lawyer change password (mirrors the customer's flow at the same URL location)
+    Route::get('/lawyer/password/edit', [LawyerController::class, 'editPassword'])->name('lawyer.password.edit');
+    Route::put('/lawyer/password/update', [LawyerController::class, 'updatePassword'])->name('lawyer.password.update');
 
     Route::post('/appointments/{id}/update-status', [AppointmentController::class, 'updateStatus'])
          ->name('appointments.update-status');

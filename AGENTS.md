@@ -36,6 +36,20 @@ php artisan serve
   `formattedDateTime()`) instead of inline conditionals in views.
 - Validation rules live in the controller action that handles the request.
 
+## Appointment Booking Rules
+
+- A customer may have **only one active (pending or approved)** appointment with
+  a given lawyer at any time.
+- The `lawyers/show` page detects an existing active appointment and replaces
+  the "Book Appointment" button with a "View My Appointment" link to the
+  existing appointment.
+- The `appointments.create` and `appointments.store` routes enforce this rule
+  server-side too — even direct URL access is refused and the user is
+  redirected to their existing active appointment with an `info` flash message.
+- A customer can book a new slot with the same lawyer only after the previous
+  appointment is `rejected`, `cancelled`, or `completed`. (Completed
+  appointments are considered resolved.)
+
 ## Default Seed Accounts
 
 | Role     | Email             | Password     |

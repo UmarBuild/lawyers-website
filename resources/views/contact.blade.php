@@ -5,7 +5,7 @@
 @section('content')
 
 <!-- Executive Page Header -->
-<section class="bg-primary-900 text-white py-14 border-b border-primary-800">
+<section class="bg-primary-900 text-white py-10 sm:py-14 border-b border-primary-800">
     <div class="max-w-7xl mx-auto px-4 text-center">
         <span class="text-accent text-xs font-semibold uppercase tracking-wider">Get in Touch</span>
         <h1 class="text-3xl sm:text-4xl font-extrabold text-white mt-2">Legal Support &amp; Inquiries</h1>
@@ -13,7 +13,7 @@
     </div>
 </section>
 
-<section class="py-16 bg-white">
+<section class="py-10 sm:py-16 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
         
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">

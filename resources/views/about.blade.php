@@ -5,7 +5,7 @@
 @section('content')
 
 <!-- Executive Page Header -->
-<section class="bg-primary-900 text-white py-14 border-b border-primary-800">
+<section class="bg-primary-900 text-white py-10 sm:py-14 border-b border-primary-800">
     <div class="max-w-7xl mx-auto px-4 text-center">
         <span class="text-accent text-xs font-semibold uppercase tracking-wider">About LawyerConnect</span>
         <h1 class="text-3xl sm:text-4xl font-extrabold text-white mt-2">Empowering Citizens with Verified Legal Counsel</h1>
@@ -14,16 +14,16 @@
 </section>
 
 <!-- Mission & Story with Realistic Law Library Image -->
-<section class="py-16 bg-white">
+<section class="py-10 sm:py-16 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-16">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-12 items-center mb-12 sm:mb-16">
             
             <div class="lg:col-span-6 space-y-5 text-gray-700 leading-relaxed">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50 text-primary-900 text-xs font-semibold border border-primary-100">
                     <i class="bi bi-shield-check text-accent"></i>
                     <span>Our Founding Mission</span>
                 </div>
-                <h2 class="text-3xl font-extrabold text-primary-900 tracking-tight">Making Quality Legal Protection Accessible To Everyone</h2>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-primary-900 tracking-tight">Making Quality Legal Protection Accessible To Everyone</h2>
                 <p>
                     Access to experienced legal help should never depend on personal connections or uncertain referrals. Whether navigating complex corporate law, commercial litigation, family disputes, real estate transactions, or urgent criminal defense, LawyerConnect bridges the gap between top legal minds and those who need their counsel.
                 </p>
@@ -44,7 +44,7 @@
 
             <div class="lg:col-span-6">
                 <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-100 group">
-                    <img src="{{ asset('images/about-legal.jpg') }}" alt="Law Library and Legal Research" class="w-full h-[400px] object-cover transition duration-700 group-hover:scale-105">
+                    <img src="{{ asset('images/about-legal.jpg') }}" alt="Law Library and Legal Research" class="w-full h-[260px] sm:h-[400px] object-cover transition duration-700 group-hover:scale-105">
                     <div class="absolute inset-0 bg-gradient-to-t from-primary-950/80 via-transparent to-transparent"></div>
                     <div class="absolute bottom-5 left-5 right-5 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-lg border border-white/40 flex items-center justify-between">
                         <div class="flex items-center gap-3">
@@ -63,7 +63,7 @@
         </div>
 
         <!-- Three Core Pillars -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16">
 
             <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-8 hover:shadow-lg transition duration-200">
                 <div class="w-12 h-12 rounded-xl bg-primary-900 text-accent flex items-center justify-center text-xl mb-5 shadow-sm">

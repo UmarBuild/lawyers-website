@@ -21,20 +21,115 @@
     <nav class="bg-primary-900 text-white shadow-xl border-b border-primary-800/80 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
 
-            <a href="{{ route('home') }}" class="text-xl sm:text-2xl font-bold tracking-wide flex items-center gap-2.5 text-white hover:text-accent transition">
+            <a href="{{ route('home') }}" class="text-xl sm:text-2xl font-bold tracking-wide flex items-center gap-2.5 text-white hover:text-accent transition relative z-50">
                 <span class="w-9 h-9 rounded-lg bg-accent/20 border border-accent/40 flex items-center justify-center text-accent text-lg shadow-sm">
                     <i class="bi bi-bank2"></i>
                 </span>
                 <span>Lawyer<span class="text-accent">Connect</span></span>
             </a>
 
-            <button id="mobile-menu-btn" class="md:hidden text-white focus:outline-none p-2 rounded-lg hover:bg-white/10 transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                </svg>
-            </button>
+            {{-- Right-side controls: notification bell (mobile + desktop) + hamburger + desktop nav --}}
+            <div class="flex items-center gap-1">
 
-            <div id="nav-links" class="hidden md:flex items-center gap-1">
+                @auth
+                    @php
+                        $navNotifications = auth()->user()->notifications()->latest()->take(5)->get();
+                        $navUnreadCount = auth()->user()->notifications()->where('is_read', false)->count();
+                    @endphp
+
+                    {{-- Mobile bell — direct link to /notifications page (NO dropdown on mobile) --}}
+                    <a href="{{ route('notifications.index') }}"
+                       class="xl:hidden relative z-50 inline-flex items-center justify-center w-10 h-10 rounded-lg text-white hover:bg-white/10 focus:outline-none transition"
+                       title="View all notifications" aria-label="Notifications">
+                        <i class="bi bi-bell text-lg"></i>
+                        <span class="{{ $navUnreadCount > 0 ? '' : 'hidden' }} absolute -top-0.5 -right-0.5 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full min-w-[18px] text-center border-2 border-primary-900 shadow-md animate-pulse">
+                            {{ $navUnreadCount > 99 ? '99+' : $navUnreadCount }}
+                        </span>
+                    </a>
+
+                    {{-- Desktop bell + dropdown (xl+ only) --}}
+                    <div class="hidden xl:block relative mr-1.5" id="notification-dropdown">
+                        <button id="notif-btn" type="button"
+                                class="relative p-2 rounded-lg text-slate-200 hover:text-white hover:bg-white/10 transition flex items-center justify-center focus:outline-none"
+                                title="Notifications" aria-label="Notifications">
+                            <i class="bi bi-bell text-lg"></i>
+                            <span id="nav-notif-badge" class="{{ $navUnreadCount > 0 ? '' : 'hidden' }} absolute -top-0.5 -right-0.5 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full min-w-[18px] text-center border-2 border-primary-900 shadow-md animate-pulse">
+                                {{ $navUnreadCount > 99 ? '99+' : $navUnreadCount }}
+                            </span>
+                        </button>
+
+                        {{-- Dropdown panel --}}
+                        <div id="notif-menu" class="hidden absolute right-0 mt-2.5 w-80 max-w-sm bg-white text-gray-800 rounded-2xl shadow-2xl border border-gray-200/80 py-0 z-50 overflow-hidden">
+                            <div class="px-4 py-3.5 bg-primary-900 text-white flex items-center justify-between border-b border-primary-800">
+                                <div class="flex items-center gap-2">
+                                    <i class="bi bi-bell-fill text-accent text-sm"></i>
+                                    <span class="font-bold text-sm">Notifications</span>
+                                    @if($navUnreadCount > 0)
+                                    <span class="bg-accent/20 text-accent text-[11px] font-semibold px-2 py-0.5 rounded-full border border-accent/40">
+                                        {{ $navUnreadCount }} new
+                                    </span>
+                                    @endif
+                                </div>
+                                <a href="{{ route('notifications.index') }}" class="text-xs text-accent hover:text-amber-300 font-medium transition">
+                                    See all
+                                </a>
+                            </div>
+
+                            <div class="max-h-80 overflow-y-auto divide-y divide-gray-100">
+                                @forelse($navNotifications as $notif)
+                                <div class="p-3.5 hover:bg-slate-50 transition flex items-start gap-3 {{ !$notif->is_read ? 'bg-primary-50/60' : '' }}">
+                                    <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-xs {{ !$notif->is_read ? 'bg-primary-900 text-accent shadow-sm' : 'bg-gray-100 text-gray-500' }}">
+                                        <i class="bi {{ $notif->iconClass() }}"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        @if($notif->link)
+                                        <a href="{{ $notif->link }}" class="text-xs font-semibold text-gray-800 hover:text-primary-900 line-clamp-2 leading-relaxed block">
+                                            {{ $notif->message }}
+                                        </a>
+                                        @else
+                                        <p class="text-xs text-gray-700 leading-relaxed font-medium">
+                                            {{ $notif->message }}
+                                        </p>
+                                        @endif
+                                        <span class="text-[11px] text-gray-600 flex items-center gap-1 mt-1">
+                                            <i class="bi bi-clock"></i> {{ $notif->timeAgo() }}
+                                        </span>
+                                    </div>
+                                </div>
+                                @empty
+                                <div class="py-8 px-4 text-center">
+                                    <div class="w-12 h-12 mx-auto rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-2">
+                                        <i class="bi bi-bell-slash text-xl"></i>
+                                    </div>
+                                    <p class="text-xs text-gray-500 font-medium">No notifications yet</p>
+                                    <p class="text-[11px] text-gray-400 mt-0.5">We'll alert you when appointments or updates arrive.</p>
+                                </div>
+                                @endforelse
+                            </div>
+
+                            {{-- See More button -> opens the full notifications page --}}
+                            <a href="{{ route('notifications.index') }}"
+                               class="block text-center py-3 bg-gray-50 text-primary-700 hover:bg-gray-100 text-xs font-bold border-t border-gray-100 transition">
+                                <i class="bi bi-arrow-right-circle mr-1"></i> See More
+                            </a>
+                        </div>
+                    </div>
+                @endauth
+
+                {{-- Hamburger button — visible below xl (1280px) --}}
+                <button id="mobile-menu-btn" type="button"
+                        class="xl:hidden relative z-50 inline-flex items-center justify-center w-10 h-10 rounded-lg text-white hover:bg-white/10 focus:outline-none transition"
+                        aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-menu">
+                    <svg id="menu-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                    <svg id="menu-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+
+                {{-- Desktop nav — visible from xl (1280px) --}}
+                <div id="nav-links" class="hidden xl:flex items-center gap-1">
 
                 <a href="{{ route('home') }}" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-200 hover:text-white hover:bg-white/10 transition">Home</a>
 
@@ -64,91 +159,13 @@
 
                 @auth
 
-                @php
-                    $navNotifications = auth()->user()->notifications()->latest()->take(10)->get();
-                    $navUnreadCount = auth()->user()->notifications()->where('is_read', false)->count();
-                @endphp
-
-                <!-- Notification Bell Dropdown (Harmonized with Navbar) -->
-                <div class="relative mr-1.5" id="notification-dropdown">
-                    <button id="notif-btn" type="button" class="relative p-2 rounded-lg text-slate-200 hover:text-white hover:bg-white/10 transition flex items-center justify-center focus:outline-none" title="Notifications" aria-label="Notifications">
-                        <i class="bi bi-bell text-lg"></i>
-                        <span id="nav-notif-badge" class="{{ $navUnreadCount > 0 ? '' : 'hidden' }} absolute -top-0.5 -right-0.5 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full min-w-[18px] text-center border-2 border-primary-900 shadow-md animate-pulse">
-                            {{ $navUnreadCount > 99 ? '99+' : $navUnreadCount }}
-                        </span>
-                    </button>
-
-                    <!-- Notifications Panel -->
-                    <div id="notif-menu" class="hidden absolute right-0 mt-2.5 w-80 sm:w-96 bg-white text-gray-800 rounded-2xl shadow-2xl border border-gray-200/80 py-0 z-50 overflow-hidden">
-                        <div class="px-4 py-3.5 bg-primary-900 text-white flex items-center justify-between border-b border-primary-800">
-                            <div class="flex items-center gap-2">
-                                <i class="bi bi-bell-fill text-accent text-sm"></i>
-                                <span class="font-bold text-sm">Notifications</span>
-                                @if($navUnreadCount > 0)
-                                <span id="notif-count-tag" class="bg-accent/20 text-accent text-[11px] font-semibold px-2 py-0.5 rounded-full border border-accent/40">
-                                    {{ $navUnreadCount }} new
-                                </span>
-                                @endif
-                            </div>
-                            @if($navNotifications->count() > 0)
-                            <button id="mark-all-read-btn" type="button" class="text-xs text-accent hover:text-amber-300 font-medium transition cursor-pointer">
-                                Mark all read
-                            </button>
-                            @endif
-                        </div>
-
-                        <div class="max-h-80 overflow-y-auto divide-y divide-gray-100" id="notif-list">
-                            @forelse($navNotifications as $notif)
-                            <div class="p-3.5 hover:bg-slate-50 transition flex items-start gap-3 notif-item {{ !$notif->is_read ? 'bg-primary-50/60' : '' }}" data-id="{{ $notif->id }}">
-                                <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-xs {{ !$notif->is_read ? 'bg-primary-900 text-accent shadow-sm' : 'bg-gray-100 text-gray-500' }}">
-                                    <i class="bi {{ $notif->iconClass() }}"></i>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    @if($notif->link)
-                                    <a href="{{ $notif->link }}" class="text-xs font-semibold text-gray-800 hover:text-primary-900 line-clamp-2 leading-relaxed block">
-                                        {{ $notif->message }}
-                                    </a>
-                                    @else
-                                    <p class="text-xs text-gray-700 leading-relaxed font-medium">
-                                        {{ $notif->message }}
-                                    </p>
-                                    @endif
-                                    <div class="flex items-center gap-2 mt-1">
-                                        <span class="text-[11px] text-gray-600 flex items-center gap-1">
-                                            <i class="bi bi-clock"></i> {{ $notif->timeAgo() }}
-                                        </span>
-                                        @if(!$notif->is_read)
-                                        <span class="w-2 h-2 rounded-full bg-accent inline-block notif-unread-dot" title="Unread"></span>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                            @empty
-                            <div class="py-8 px-4 text-center">
-                                <div class="w-12 h-12 mx-auto rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-2">
-                                    <i class="bi bi-bell-slash text-xl"></i>
-                                </div>
-                                <p class="text-xs text-gray-500 font-medium">No notifications yet</p>
-                                <p class="text-[11px] text-gray-400 mt-0.5">We'll alert you when appointments or updates arrive.</p>
-                            </div>
-                            @endforelse
-                        </div>
-
-                        @if($navNotifications->count() > 0)
-                        <div class="p-2.5 bg-gray-50 text-center border-t border-gray-100">
-                            <span class="text-[11px] text-gray-500">Notifications mark as read when opened</span>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-
                 <!-- User Dropdown (Harmonized) -->
                 <div class="relative" id="user-dropdown">
                     <button id="dropdown-btn" class="px-3 py-1.5 rounded-lg hover:bg-white/10 transition flex items-center gap-2 text-sm font-medium text-white focus:outline-none">
                         <div class="w-7 h-7 rounded-full bg-accent/20 border border-accent/40 text-accent flex items-center justify-center font-bold text-xs">
                             {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                         </div>
-                        <span>{{ auth()->user()->name }}</span>
+                        <span class="hidden sm:inline truncate max-w-[140px]">{{ auth()->user()->name }}</span>
                         <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
@@ -159,6 +176,7 @@
                         @if(auth()->user()->isLawyer())
                         <a href="{{ route('lawyer.dashboard') }}" class="block px-4 py-2 hover:bg-gray-100">My Dashboard</a>
                         <a href="{{ route('lawyer.edit-profile') }}" class="block px-4 py-2 hover:bg-gray-100">Edit Profile</a>
+                        <a href="{{ route('lawyer.password.edit') }}" class="block px-4 py-2 hover:bg-gray-100">Change Password</a>
                         <a href="{{ route('lawyer.appointments') }}" class="block px-4 py-2 hover:bg-gray-100">My Appointments</a>
                         @endif
 
@@ -182,18 +200,167 @@
 
                 @endauth
             </div>
+            {{-- Close right-side controls wrapper (notification bell + hamburger + nav-links) --}}
+            </div>
+        </div>
+
+        {{-- Mobile menu overlay — slides in from bottom --}}
+        <div id="mobile-menu"
+             class="xl:hidden fixed inset-0 z-40 pointer-events-none"
+             aria-hidden="true">
+
+            {{-- Backdrop --}}
+            <div id="mobile-backdrop"
+                 class="absolute inset-0 bg-black/60 opacity-0 transition-opacity duration-300 ease-out"
+                 data-mobile-close></div>
+
+            {{-- Panel slides from bottom --}}
+            <div id="mobile-menu-panel"
+                 class="absolute bottom-0 left-1/2 w-full max-w-md bg-primary-900 rounded-t-3xl shadow-2xl px-6 pt-6 pb-10 transition-transform duration-300 ease-out border-t-4 border-accent overflow-y-auto max-h-[90vh]"
+                 style="transform: translate(-50%, 100%);">
+
+                {{-- Handle bar --}}
+                <div class="flex justify-center mb-4">
+                    <span class="block w-12 h-1.5 bg-white/30 rounded-full"></span>
+                </div>
+
+                <div id="mobile-menu-links" class="flex flex-col items-center gap-3 text-center">
+
+                    <a href="{{ route('home') }}"
+                       class="mobile-link w-full max-w-xs px-5 py-3 rounded-xl text-base font-medium text-slate-200 hover:text-white hover:bg-white/10 transition bg-white/5"
+                       data-mobile-close>
+                        <i class="bi bi-house-door mr-2 text-accent"></i>Home
+                    </a>
+
+                    <a href="{{ route('lawyers.index') }}"
+                       class="mobile-link w-full max-w-xs px-5 py-3 rounded-xl text-base font-medium text-slate-200 hover:text-white hover:bg-white/10 transition bg-white/5"
+                       data-mobile-close>
+                        <i class="bi bi-people mr-2 text-accent"></i>Lawyers
+                    </a>
+
+                    <a href="{{ route('about') }}"
+                       class="mobile-link w-full max-w-xs px-5 py-3 rounded-xl text-base font-medium text-slate-200 hover:text-white hover:bg-white/10 transition bg-white/5"
+                       data-mobile-close>
+                        <i class="bi bi-info-circle mr-2 text-accent"></i>About
+                    </a>
+
+                    <a href="{{ route('contact') }}"
+                       class="mobile-link w-full max-w-xs px-5 py-3 rounded-xl text-base font-medium text-slate-200 hover:text-white hover:bg-white/10 transition bg-white/5"
+                       data-mobile-close>
+                        <i class="bi bi-envelope mr-2 text-accent"></i>Contact
+                    </a>
+
+                    @auth
+                        @if(auth()->user()->isCustomer())
+                            <a href="{{ route('customer.dashboard') }}"
+                               class="mobile-link w-full max-w-xs px-5 py-3 rounded-xl text-base font-medium text-slate-200 hover:text-white hover:bg-white/10 transition bg-white/5"
+                               data-mobile-close>
+                                <i class="bi bi-speedometer2 mr-2 text-accent"></i>Dashboard
+                            </a>
+                            <a href="{{ route('my-appointments') }}"
+                               class="mobile-link w-full max-w-xs px-5 py-3 rounded-xl text-base font-medium text-slate-200 hover:text-white hover:bg-white/10 transition bg-white/5"
+                               data-mobile-close>
+                                <i class="bi bi-calendar-check mr-2 text-accent"></i>Appointments
+                            </a>
+                            <a href="{{ route('customer.profile.edit') }}"
+                               class="mobile-link w-full max-w-xs px-5 py-3 rounded-xl text-base font-medium text-slate-200 hover:text-white hover:bg-white/10 transition bg-white/5"
+                               data-mobile-close>
+                                <i class="bi bi-person-gear mr-2 text-accent"></i>Edit Profile
+                            </a>
+                            <a href="{{ route('customer.password.edit') }}"
+                               class="mobile-link w-full max-w-xs px-5 py-3 rounded-xl text-base font-medium text-slate-200 hover:text-white hover:bg-white/10 transition bg-white/5"
+                               data-mobile-close>
+                                <i class="bi bi-key mr-2 text-accent"></i>Change Password
+                            </a>
+                        @elseif(auth()->user()->isLawyer())
+                            <a href="{{ route('lawyer.dashboard') }}"
+                               class="mobile-link w-full max-w-xs px-5 py-3 rounded-xl text-base font-medium text-slate-200 hover:text-white hover:bg-white/10 transition bg-white/5"
+                               data-mobile-close>
+                                <i class="bi bi-speedometer2 mr-2 text-accent"></i>Dashboard
+                            </a>
+                            <a href="{{ route('lawyer.appointments') }}"
+                               class="mobile-link w-full max-w-xs px-5 py-3 rounded-xl text-base font-medium text-slate-200 hover:text-white hover:bg-white/10 transition bg-white/5"
+                               data-mobile-close>
+                                <i class="bi bi-calendar-check mr-2 text-accent"></i>Appointments
+                            </a>
+                            <a href="{{ route('lawyer.edit-profile') }}"
+                               class="mobile-link w-full max-w-xs px-5 py-3 rounded-xl text-base font-medium text-slate-200 hover:text-white hover:bg-white/10 transition bg-white/5"
+                               data-mobile-close>
+                                <i class="bi bi-person-gear mr-2 text-accent"></i>Edit Profile
+                            </a>
+                            <a href="{{ route('lawyer.password.edit') }}"
+                               class="mobile-link w-full max-w-xs px-5 py-3 rounded-xl text-base font-medium text-slate-200 hover:text-white hover:bg-white/10 transition bg-white/5"
+                               data-mobile-close>
+                                <i class="bi bi-key mr-2 text-accent"></i>Change Password
+                            </a>
+                        @elseif(auth()->user()->isAdmin())
+                            <a href="{{ route('admin.dashboard') }}"
+                               class="mobile-link w-full max-w-xs px-5 py-3 rounded-xl text-base font-medium text-slate-200 hover:text-white hover:bg-white/10 transition bg-white/5"
+                               data-mobile-close>
+                                <i class="bi bi-shield-lock mr-2 text-accent"></i>Admin Panel
+                            </a>
+                            <a href="{{ route('admin.content') }}"
+                               class="mobile-link w-full max-w-xs px-5 py-3 rounded-xl text-base font-medium text-slate-200 hover:text-white hover:bg-white/10 transition bg-white/5"
+                               data-mobile-close>
+                                <i class="bi bi-pencil-square mr-2 text-accent"></i>Manage Content
+                            </a>
+                        @endif
+
+                        <span class="mobile-link block w-full max-w-xs h-px bg-white/15 my-1"></span>
+
+                        <div class="mobile-link w-full max-w-xs flex items-center gap-3 px-5 py-3 rounded-xl bg-white/5">
+                            <div class="w-9 h-9 rounded-full bg-accent/20 border border-accent/40 text-accent flex items-center justify-center font-bold text-sm">
+                                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                            </div>
+                            <span class="text-sm font-medium text-white truncate">{{ auth()->user()->name }}</span>
+                        </div>
+
+                        <a href="#"
+                           onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                           class="mobile-link w-full max-w-xs px-5 py-3 rounded-xl text-base font-semibold bg-red-500/90 hover:bg-red-500 transition"
+                           data-mobile-close>
+                            <i class="bi bi-box-arrow-right mr-2"></i>Logout
+                        </a>
+                    @endauth
+
+                    @guest
+                        <span class="mobile-link block w-full max-w-xs h-px bg-white/15 my-1"></span>
+
+                        <a href="{{ route('login') }}"
+                           class="mobile-link w-full max-w-xs px-5 py-3 rounded-xl text-base font-medium text-slate-200 hover:text-white hover:bg-white/10 transition bg-white/5"
+                           data-mobile-close>
+                            <i class="bi bi-box-arrow-in-right mr-2 text-accent"></i>Login
+                        </a>
+                        <a href="{{ route('register') }}"
+                           class="mobile-link w-full max-w-xs px-5 py-3 rounded-xl text-base font-semibold bg-accent hover:bg-amber-400 text-primary-950 transition"
+                           data-mobile-close>
+                            <i class="bi bi-person-plus mr-2"></i>Register
+                        </a>
+                    @endguest
+                </div>
+            </div>
         </div>
     </nav>
 
+    {{-- Executive-styled flash messages — harmonized with navbar --}}
     @if(session('success'))
-    <div class="bg-green-500 text-white px-6 py-3 text-center">
-        {{ session('success') }}
+    <div class="bg-primary-900 text-white px-4 sm:px-6 py-3.5 text-sm sm:text-base text-center flex items-center justify-center gap-2.5 border-b-2 border-green-500/70 shadow-sm">
+        <i class="bi bi-check-circle-fill text-green-400 text-base sm:text-lg"></i>
+        <span>{{ session('success') }}</span>
     </div>
     @endif
 
     @if(session('error'))
-    <div class="bg-red-500 text-white px-6 py-3 text-center">
-        {{ session('error') }}
+    <div class="bg-primary-900 text-white px-4 sm:px-6 py-3.5 text-sm sm:text-base text-center flex items-center justify-center gap-2.5 border-b-2 border-red-500/70 shadow-sm">
+        <i class="bi bi-exclamation-triangle-fill text-red-400 text-base sm:text-lg"></i>
+        <span>{{ session('error') }}</span>
+    </div>
+    @endif
+
+    @if(session('info'))
+    <div class="bg-primary-900 text-white px-4 sm:px-6 py-3.5 text-sm sm:text-base text-center flex items-center justify-center gap-2.5 border-b-2 border-accent/70 shadow-sm">
+        <i class="bi bi-info-circle-fill text-accent text-base sm:text-lg"></i>
+        <span>{{ session('info') }}</span>
     </div>
     @endif
 
@@ -263,65 +430,21 @@
     @auth
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const notifBtn = document.getElementById('notif-btn');
+            // ============================================================
+            //  SIMPLE desktop notification dropdown toggle (xl+ only)
+            //  Mobile bell is a direct link to /notifications — no JS
+            // ============================================================
+            const notifBtn  = document.getElementById('notif-btn');
             const notifMenu = document.getElementById('notif-menu');
-            const notifBadge = document.getElementById('nav-notif-badge');
-            const notifCountTag = document.getElementById('notif-count-tag');
-            const markAllBtn = document.getElementById('mark-all-read-btn');
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-            let isMarked = false;
-
-            function markNotificationsAsRead() {
-                if (isMarked) return;
-                
-                if (notifBadge && !notifBadge.classList.contains('hidden')) {
-                    notifBadge.classList.add('hidden');
-                }
-                if (notifCountTag) {
-                    notifCountTag.style.display = 'none';
-                }
-                document.querySelectorAll('.notif-unread-dot').forEach(dot => dot.remove());
-                document.querySelectorAll('.notif-item').forEach(item => item.classList.remove('bg-blue-50/40'));
-
-                if (csrfToken) {
-                    fetch('{{ route("notifications.read", "all") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken,
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({})
-                    }).then(res => {
-                        if (res.ok) isMarked = true;
-                    }).catch(err => console.error('Failed to sync notification status:', err));
-                }
-            }
 
             if (notifBtn && notifMenu) {
                 notifBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    const willOpen = notifMenu.classList.contains('hidden');
-                    
                     // Close user dropdown if open
                     const userMenu = document.getElementById('dropdown-menu');
                     if (userMenu) userMenu.classList.add('hidden');
-
-                    if (willOpen) {
-                        notifMenu.classList.remove('hidden');
-                        // When dropdown opens, mark notifications as read
-                        markNotificationsAsRead();
-                    } else {
-                        notifMenu.classList.add('hidden');
-                    }
+                    notifMenu.classList.toggle('hidden');
                 });
-
-                if (markAllBtn) {
-                    markAllBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        markNotificationsAsRead();
-                    });
-                }
 
                 // Close dropdown when clicking outside
                 document.addEventListener('click', function(e) {
@@ -331,7 +454,7 @@
                 });
             }
 
-            // Close notif menu if user dropdown opens
+            // Close notif dropdown if user dropdown opens
             const userBtn = document.getElementById('dropdown-btn');
             if (userBtn && notifMenu) {
                 userBtn.addEventListener('click', function() {

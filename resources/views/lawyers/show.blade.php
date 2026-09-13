@@ -8,19 +8,19 @@
     <div class="max-w-4xl mx-auto px-4">
 
         <!-- Profile Card -->
-        <div class="bg-white border rounded-xl p-8">
-            <div class="flex items-start gap-6">
+        <div class="bg-white border rounded-xl p-6 sm:p-8">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 text-center sm:text-left">
                 <!-- Avatar -->
-                <div class="w-24 h-24 bg-primary-50 rounded-full flex items-center justify-center text-primary-500 text-3xl font-bold flex-shrink-0">
+                <div class="w-20 h-20 sm:w-24 sm:h-24 bg-primary-50 rounded-full flex items-center justify-center text-primary-500 text-2xl sm:text-3xl font-bold flex-shrink-0">
                     {{ strtoupper(substr($lawyer->name, 0, 1)) }}
                 </div>
                 <div class="flex-1">
-                    <h1 class="text-2xl font-bold text-gray-800">{{ $lawyer->name }}</h1>
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-800">{{ $lawyer->name }}</h1>
                     <p class="text-primary-500">{{ $lawyer->specialization }}</p>
                     <p class="text-gray-400 text-sm">{{ $lawyer->city }}</p>
 
                     <!-- Rating -->
-                    <div class="flex items-center gap-0.5 mt-2">
+                    <div class="flex items-center gap-0.5 mt-2 justify-center sm:justify-start">
                         @for($i = 1; $i <= 5; $i++)
                         <span class="{{ $i <= $lawyer->rating ? 'text-yellow-400' : 'text-gray-200' }}">&#9733;</span>
                         @endfor
@@ -77,12 +77,40 @@
             </div>
             @endif
 
-            <!-- Book Appointment Button -->
+            <!-- Book Appointment / View Appointment Button -->
             @auth
                 @if(auth()->user()->isCustomer())
-                <a href="{{ route('appointments.create', $lawyer->id) }}" class="inline-block mt-6 px-6 py-3 bg-primary-500 text-white rounded-lg font-semibold hover:bg-primary-600 transition">
-                    Book Appointment
-                </a>
+
+                    @if($activeAppointment)
+                        {{-- Customer already has an active (pending/approved) appointment with this lawyer --}}
+                        <div class="mt-6 p-4 rounded-xl bg-primary-50 border border-primary-100">
+                            <p class="text-sm font-semibold text-primary-900 mb-3 flex items-center gap-2">
+                                <i class="bi bi-info-circle-fill text-accent"></i>
+                                @if($activeAppointment->status === 'pending')
+                                    You already have a <span class="text-yellow-700">pending</span> appointment request with this advocate.
+                                @else
+                                    You already have an <span class="text-green-700">approved</span> appointment with this advocate.
+                                @endif
+                            </p>
+                            <p class="text-xs text-gray-500 mb-3">
+                                <i class="bi bi-calendar3"></i>
+                                {{ $activeAppointment->formattedDateTime() }}
+                            </p>
+                            <a href="{{ route('appointments.show', $activeAppointment->id) }}"
+                               class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold text-sm transition shadow-sm">
+                                <i class="bi bi-eye"></i>
+                                View My Appointment
+                            </a>
+                        </div>
+                    @else
+                        {{-- No active appointment — allow fresh booking --}}
+                        <a href="{{ route('appointments.create', $lawyer->id) }}"
+                           class="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-primary-500 text-white rounded-lg font-semibold hover:bg-primary-600 transition shadow-sm">
+                            <i class="bi bi-calendar-plus"></i>
+                            Book Appointment
+                        </a>
+                    @endif
+
                 @endif
             @endauth
 

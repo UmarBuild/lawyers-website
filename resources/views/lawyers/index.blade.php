@@ -5,12 +5,12 @@
 @section('content')
 
 <!-- Executive Find Advocates Header -->
-<section class="bg-primary-900 text-white py-12 border-b border-primary-800">
+<section class="bg-primary-900 text-white py-10 sm:py-12 border-b border-primary-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
         <div class="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
                 <span class="text-accent text-xs font-semibold uppercase tracking-wider">Advocate Directory</span>
-                <h1 class="text-3xl font-extrabold text-white mt-1">Verified Legal Advocates</h1>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">Verified Legal Advocates</h1>
                 <p class="text-sm text-slate-300 mt-1">Browse and book appointments with verified lawyers across all jurisdictions in Pakistan.</p>
             </div>
             <div class="hidden lg:flex items-center gap-4 bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/15 shadow-sm">

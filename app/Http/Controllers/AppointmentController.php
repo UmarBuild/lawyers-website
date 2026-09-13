@@ -19,6 +19,16 @@ class AppointmentController extends Controller
             abort(404, 'Lawyer not found.');
         }
 
+        // Block direct re-booking when an active appointment already exists.
+        // The customer must first resolve (cancel/complete) the existing one.
+        if (auth()->user()->isCustomer() && Appointment::customerHasActiveWith(auth()->id(), $lawyer->id)) {
+            $existing = Appointment::activeAppointmentFor(auth()->id(), $lawyer->id);
+
+            return redirect()
+                ->route('appointments.show', $existing->id)
+                ->with('info', 'You already have an active appointment with this advocate. Please resolve it before booking a new one.');
+        }
+
         $availableDays = $lawyer->getAvailableDays();
 
         $bookedDates = $lawyer->lawyerAppointments()
@@ -46,6 +56,17 @@ class AppointmentController extends Controller
 
         $customer = Auth::user();
         $cleanTime = date('H:i', strtotime($request->appointment_time));
+
+        // 0. Block re-booking with the same lawyer while an active appointment exists.
+        //    This is server-side protection — even if the user hits /book-appointment
+        //    directly via URL, we refuse to create a duplicate active booking.
+        if (Appointment::customerHasActiveWith($customer->id, $request->lawyer_id)) {
+            $existing = Appointment::activeAppointmentFor($customer->id, $request->lawyer_id);
+
+            return redirect()
+                ->route('appointments.show', $existing->id)
+                ->with('info', 'You already have an active appointment with this advocate. Please cancel it first if you want to book a new slot.');
+        }
 
         // 1. Check if the lawyer already has an ACTIVE (pending or approved) appointment in this slot
         $lawyerSlotOccupied = Appointment::where('lawyer_id', $request->lawyer_id)
@@ -249,5 +270,56 @@ class AppointmentController extends Controller
         }
 
         return back();
+    }
+
+    /**
+     * Delete a single notification (or all when id === 'all').
+     */
+    public function deleteNotification($id)
+    {
+        if ($id === 'all') {
+            Notification::where('user_id', auth()->id())->delete();
+
+            if (request()->wantsJson() || request()->ajax()) {
+                return response()->json(['success' => true, 'cleared' => true]);
+            }
+
+            return back()->with('success', 'All notifications deleted.');
+        }
+
+        $notification = Notification::findOrFail($id);
+
+        if ($notification->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $notification->delete();
+
+        if (request()->wantsJson() || request()->ajax()) {
+            $remaining = Notification::where('user_id', auth()->id())->count();
+            return response()->json(['success' => true, 'remaining' => $remaining]);
+        }
+
+        return back()->with('success', 'Notification deleted.');
+    }
+
+    /**
+     * Show the full notifications page (lists all of the user's notifications
+     * with delete buttons + "mark all read" + "delete all" actions).
+     */
+    public function showNotifications()
+    {
+        $user = auth()->user();
+
+        // Mark all as read the moment the page is opened (so the badge clears).
+        Notification::where('user_id', $user->id)
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        $notifications = Notification::where('user_id', $user->id)
+            ->latest()
+            ->paginate(15);
+
+        return view('notifications.index', compact('notifications'));
     }
 }

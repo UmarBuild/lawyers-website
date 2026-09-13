@@ -5,9 +5,9 @@
 @section('content')
 <section class="max-w-6xl mx-auto px-4 py-10">
 
-    <div class="flex items-center justify-between mb-8">
-        <h1 class="text-2xl font-bold text-gray-800">Manage Appointments</h1>
-        <a href="{{ route('lawyer.dashboard') }}" class="text-sm text-primary-500 hover:underline">Back to Dashboard</a>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-800">Manage Appointments</h1>
+        <a href="{{ route('lawyer.dashboard') }}" class="text-sm text-primary-500 hover:underline self-start sm:self-auto">Back to Dashboard</a>
     </div>
 
     @if(session('success'))

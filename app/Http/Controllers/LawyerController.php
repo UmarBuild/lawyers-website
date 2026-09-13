@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Service;
+use App\Models\Appointment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class LawyerController extends Controller
 {
@@ -60,6 +62,9 @@ class LawyerController extends Controller
 
     /**
      * Show a single lawyer's public profile.
+     * If the logged-in customer already has an active (pending/approved)
+     * appointment with this lawyer, that appointment is passed to the view
+     * so the "Book Appointment" button can be replaced with "View My Appointment".
      */
     public function show($id)
     {
@@ -69,7 +74,12 @@ class LawyerController extends Controller
             abort(404, 'Lawyer not found.');
         }
 
-        return view('lawyers.show', compact('lawyer'));
+        $activeAppointment = null;
+        if (auth()->check() && auth()->user()->isCustomer()) {
+            $activeAppointment = Appointment::activeAppointmentFor(auth()->id(), $lawyer->id);
+        }
+
+        return view('lawyers.show', compact('lawyer', 'activeAppointment'));
     }
 
     /**
@@ -125,9 +135,41 @@ class LawyerController extends Controller
     {
         $lawyer = auth()->user();
 
+        // Normalize time inputs so validation never fails:
+        // - empty string  -> null
+        // - "09:00:00"    -> "09:00"   (strip seconds coming from DB TIME column)
+        // - "9:00"        -> "09:00"   (pad hour for date_format:H:i)
+        // - anything else that doesn't look like H:MM or HH:MM -> null
+        foreach (['available_time_start', 'available_time_end'] as $timeField) {
+            $value = $request->input($timeField);
+            if (!is_string($value) || trim($value) === '') {
+                $request->merge([$timeField => null]);
+                continue;
+            }
+            $value = trim($value);
+            // Strip seconds if present (e.g. "09:00:00" -> "09:00")
+            if (preg_match('/^(\d{1,2}):(\d{2}):\d{2}$/', $value, $m)) {
+                $value = str_pad($m[1], 2, '0', STR_PAD_LEFT) . ':' . $m[2];
+            }
+            // Pad single-digit hour (e.g. "9:00" -> "09:00")
+            if (preg_match('/^(\d):(\d{2})$/', $value)) {
+                $value = '0' . $value;
+            }
+            // Final check — must be HH:MM, otherwise discard
+            if (!preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $value)) {
+                $value = null;
+            }
+            $request->merge([$timeField => $value]);
+        }
+
+        // Phone: empty string -> null
+        if ($request->has('phone') && trim($request->phone) === '') {
+            $request->merge(['phone' => null]);
+        }
+
         $rules = [
             'name'                 => 'required|string|max:255',
-            'phone'                => 'required|string|max:20',
+            'phone'                => 'nullable|string|max:20',
             'city'                 => 'required|string|max:100',
             'address'              => 'nullable|string|max:500',
             'specialization'       => 'required|string|max:100',
@@ -155,6 +197,42 @@ class LawyerController extends Controller
 
         return redirect()->route('lawyer.dashboard')
             ->with('success', 'Profile updated successfully.');
+    }
+
+    /**
+     * Show the lawyer change-password form.
+     */
+    public function editPassword()
+    {
+        return view('lawyer.change-password');
+    }
+
+    /**
+     * Update the logged-in lawyer's password.
+     */
+    public function updatePassword(Request $request)
+    {
+        /** @var User $lawyer */
+        $lawyer = auth()->user();
+
+        $validated = $request->validate([
+            'current_password'      => 'required|string',
+            'password'              => 'required|string|min:8|confirmed',
+            'password_confirmation' => 'required|string',
+        ]);
+
+        if (!Hash::check($validated['current_password'], $lawyer->password)) {
+            return redirect()->back()
+                ->withErrors(['current_password' => 'Current password is incorrect.'])
+                ->withInput();
+        }
+
+        $lawyer->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        return redirect()->route('lawyer.dashboard')
+            ->with('success', 'Password changed successfully.');
     }
 
     /**

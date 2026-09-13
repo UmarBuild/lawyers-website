@@ -65,6 +65,35 @@ class Appointment extends Model
         return $this->customer_rating !== null;
     }
 
+    /**
+     * Check if a customer has any "active" appointment with a given lawyer.
+     *
+     * "Active" means pending or approved — i.e. the booking is still in play
+     * and the customer should NOT be allowed to start a brand-new booking with
+     * the same lawyer until the existing one is resolved (approved/completed
+     * and rated, rejected, or cancelled).
+     */
+    public static function customerHasActiveWith(int $customerId, int $lawyerId): bool
+    {
+        return self::where('customer_id', $customerId)
+            ->where('lawyer_id', $lawyerId)
+            ->whereIn('status', ['pending', 'approved'])
+            ->exists();
+    }
+
+    /**
+     * Get the customer's currently-active appointment with a given lawyer
+     * (pending or approved), or null if none exists.
+     */
+    public static function activeAppointmentFor(int $customerId, int $lawyerId): ?self
+    {
+        return self::where('customer_id', $customerId)
+            ->where('lawyer_id', $lawyerId)
+            ->whereIn('status', ['pending', 'approved'])
+            ->latest('id')
+            ->first();
+    }
+
     public function statusBadge(): string
     {
         return match($this->status) {

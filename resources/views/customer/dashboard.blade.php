@@ -4,97 +4,120 @@
 
 @section('content')
 
-<div class="max-w-6xl mx-auto px-4 py-10">
-
-    {{-- Welcome Header --}}
-    <div class="bg-primary-500 text-white rounded-lg p-8 mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+<!-- Executive Welcome Banner -->
+<section class="bg-primary-900 text-white py-10 sm:py-14 border-b border-primary-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-            <h1 class="text-2xl md:text-3xl font-bold mb-1">Welcome back, {{ $user->name }} 👋</h1>
-            <p class="text-primary-100">Here's a quick look at your recent activity.</p>
+            <span class="text-accent text-xs font-semibold uppercase tracking-wider">Client Portal</span>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white mt-2">Welcome back, {{ $user->name }}</h1>
+            <p class="text-sm sm:text-base text-slate-300 mt-2 max-w-2xl">Here's a quick look at your recent activity, bookings, and account options.</p>
         </div>
         <a href="{{ route('customer.profile.edit') }}"
-           class="self-start md:self-auto bg-white text-primary-700 px-5 py-2 rounded-lg font-semibold hover:bg-primary-50 transition">
-            Edit Profile
+           class="inline-flex items-center gap-2 bg-accent hover:bg-amber-400 text-primary-950 font-bold px-5 py-2.5 rounded-xl transition shadow-md self-start md:self-auto">
+            <i class="bi bi-pencil-square"></i>
+            <span>Edit Profile</span>
         </a>
     </div>
+</section>
 
-    {{-- Quick Actions --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
-        <a href="{{ route('lawyers.index') }}"
-           class="bg-white border border-gray-100 rounded-lg p-6 shadow-sm hover:shadow-md transition flex items-center gap-4">
-            <div class="w-12 h-12 bg-primary-50 text-primary-500 rounded-full flex items-center justify-center">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-            </div>
-            <div>
-                <h3 class="font-semibold text-gray-800">Find a Lawyer</h3>
-                <p class="text-sm text-gray-500">Search by specialization or city</p>
-            </div>
-        </a>
+<section class="py-10 sm:py-12 bg-slate-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
 
-        <a href="{{ route('my-appointments') }}"
-           class="bg-white border border-gray-100 rounded-lg p-6 shadow-sm hover:shadow-md transition flex items-center gap-4">
-            <div class="w-12 h-12 bg-primary-50 text-primary-500 rounded-full flex items-center justify-center">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-            </div>
-            <div>
-                <h3 class="font-semibold text-gray-800">My Appointments</h3>
-                <p class="text-sm text-gray-500">View all your bookings</p>
-            </div>
-        </a>
-    </div>
+        @if(session('success'))
+        <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl mb-6 text-sm flex items-center gap-2 shadow-sm">
+            <i class="bi bi-check-circle-fill text-green-500"></i>
+            <span>{{ session('success') }}</span>
+        </div>
+        @endif
 
-    {{-- Recent Appointments --}}
-    <div class="bg-white border border-gray-100 rounded-lg shadow-sm">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <h2 class="text-lg font-semibold text-gray-800">Recent Appointments</h2>
-            <a href="{{ route('my-appointments') }}" class="text-sm text-primary-500 hover:underline">View all</a>
+        {{-- Quick Actions --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
+            <a href="{{ route('lawyers.index') }}"
+               class="bg-white border border-gray-200/80 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:border-accent/40 transition flex items-center gap-4 group">
+                <div class="w-14 h-14 rounded-xl bg-primary-900 text-accent flex items-center justify-center text-2xl shrink-0 group-hover:scale-105 transition">
+                    <i class="bi bi-search"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-primary-900 text-base">Find a Lawyer</h3>
+                    <p class="text-sm text-gray-500">Search by specialization or city</p>
+                </div>
+            </a>
+
+            <a href="{{ route('my-appointments') }}"
+               class="bg-white border border-gray-200/80 rounded-2xl p-6 shadow-sm hover:shadow-xl hover:border-accent/40 transition flex items-center gap-4 group">
+                <div class="w-14 h-14 rounded-xl bg-primary-900 text-accent flex items-center justify-center text-2xl shrink-0 group-hover:scale-105 transition">
+                    <i class="bi bi-calendar2-check"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-primary-900 text-base">My Appointments</h3>
+                    <p class="text-sm text-gray-500">View all your bookings</p>
+                </div>
+            </a>
         </div>
 
-        @if($appointments->count() > 0)
-            <div class="divide-y divide-gray-100">
-                @foreach($appointments as $appointment)
-                    <a href="{{ route('appointments.show', $appointment->id) }}"
-                       class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 px-6 py-4 hover:bg-gray-50 transition">
-                        <div>
-                            <p class="font-medium text-gray-800">{{ $appointment->lawyer->name }}</p>
-                            <p class="text-sm text-gray-500">{{ $appointment->lawyer->specialization }}</p>
-                        </div>
-
-                        <div class="text-sm text-gray-500">
-                            {{ $appointment->formattedDateTime() }}
-                        </div>
-
-                        <div>
-                            @php
-                                $statusStyles = [
-                                    'pending'   => 'bg-yellow-100 text-yellow-700',
-                                    'approved'  => 'bg-green-100 text-green-700',
-                                    'rejected'  => 'bg-red-100 text-red-700',
-                                    'completed' => 'bg-blue-100 text-blue-700',
-                                ];
-                                $style = $statusStyles[$appointment->status] ?? 'bg-gray-100 text-gray-700';
-                            @endphp
-                            <span class="text-xs font-semibold px-3 py-1 rounded-full {{ $style }}">
-                                {{ ucfirst($appointment->status) }}
-                            </span>
-                        </div>
-                    </a>
-                @endforeach
-            </div>
-        @else
-            <div class="px-6 py-10 text-center text-gray-400">
-                <p>You have no appointments yet.</p>
-                <a href="{{ route('lawyers.index') }}" class="inline-block mt-3 text-primary-500 font-medium hover:underline">
-                    Find a lawyer to get started
+        {{-- Recent Appointments --}}
+        <div class="bg-white border border-gray-200/80 rounded-2xl shadow-sm overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-primary-900 text-white">
+                <h2 class="text-base font-bold flex items-center gap-2">
+                    <i class="bi bi-clock-history text-accent"></i>
+                    Recent Appointments
+                </h2>
+                <a href="{{ route('my-appointments') }}" class="text-xs text-accent hover:text-amber-300 font-semibold transition">
+                    View all <i class="bi bi-arrow-right ml-0.5"></i>
                 </a>
             </div>
-        @endif
-    </div>
 
-</div>
+            @if($appointments->count() > 0)
+                <div class="divide-y divide-gray-100">
+                    @foreach($appointments as $appointment)
+                        <a href="{{ route('appointments.show', $appointment->id) }}"
+                           class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-6 py-4 hover:bg-slate-50 transition">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-10 h-10 rounded-full bg-primary-50 text-primary-700 flex items-center justify-center font-bold shrink-0">
+                                    {{ strtoupper(substr($appointment->lawyer->name, 0, 1)) }}
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="font-semibold text-gray-800 truncate">{{ $appointment->lawyer->name }}</p>
+                                    <p class="text-xs text-gray-500 truncate">{{ $appointment->lawyer->specialization }}</p>
+                                </div>
+                            </div>
+
+                            <div class="text-sm text-gray-500 flex items-center gap-1.5">
+                                <i class="bi bi-calendar3 text-accent"></i>
+                                {{ $appointment->formattedDateTime() }}
+                            </div>
+
+                            @php
+                                $statusStyles = [
+                                    'pending'   => 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                                    'approved'  => 'bg-green-100 text-green-800 border-green-200',
+                                    'rejected'  => 'bg-red-100 text-red-800 border-red-200',
+                                    'completed' => 'bg-blue-100 text-blue-800 border-blue-200',
+                                ];
+                                $style = $statusStyles[$appointment->status] ?? 'bg-gray-100 text-gray-700 border-gray-200';
+                            @endphp
+                            <span class="text-xs font-semibold px-3 py-1 rounded-full border {{ $style }} w-fit">
+                                {{ ucfirst($appointment->status) }}
+                            </span>
+                        </a>
+                    @endforeach
+                </div>
+            @else
+                <div class="px-6 py-12 text-center">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-3">
+                        <i class="bi bi-calendar-x text-2xl"></i>
+                    </div>
+                    <p class="text-gray-600 font-semibold">You have no appointments yet.</p>
+                    <a href="{{ route('lawyers.index') }}"
+                       class="inline-flex items-center gap-2 mt-4 bg-accent hover:bg-amber-400 text-primary-950 font-semibold px-5 py-2 rounded-lg text-sm transition shadow-sm">
+                        <i class="bi bi-search"></i>
+                        Find a Lawyer
+                    </a>
+                </div>
+            @endif
+        </div>
+
+    </div>
+</section>
 
 @endsection

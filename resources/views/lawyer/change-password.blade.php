@@ -10,7 +10,7 @@
         <span class="text-accent text-xs font-semibold uppercase tracking-wider">Account Security</span>
         <h1 class="text-3xl sm:text-4xl font-extrabold text-white mt-2">Change Password</h1>
         <p class="text-sm sm:text-base text-slate-300 mt-3 max-w-2xl mx-auto">
-            Keep your client account secure by updating your password regularly.
+            Keep your advocate account secure by updating your password regularly.
         </p>
     </div>
 </section>
@@ -48,7 +48,7 @@
                 </div>
             </div>
 
-            <form action="{{ route('customer.password.update') }}" method="POST">
+            <form action="{{ route('lawyer.password.update') }}" method="POST">
                 @csrf
                 @method('PUT')
 
@@ -95,7 +95,7 @@
                         <i class="bi bi-shield-check"></i>
                         <span>Update Password</span>
                     </button>
-                    <a href="{{ route('customer.profile.edit') }}"
+                    <a href="{{ route('lawyer.edit-profile') }}"
                        class="px-6 py-3 border border-gray-300 rounded-xl font-semibold text-gray-700 hover:bg-gray-50 transition text-center">
                         Cancel
                     </a>
